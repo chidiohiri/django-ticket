@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center ">
+        <h6 class="mb-0">Create A Ticket</h6>
+
+    </div>
+    <div class="card-body">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Issue Title</label>
+                        {% render_field form.title class="form-control" %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="exampleInputEmail1" class="form-label">Description</label>
+                        {% render_field form.description class="form-control" %}
+                        <div id="emailHelp" class="form-text">
+                            Tell us more about the technical issue
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Select Priority</label>
+                                {% render_field form.priority class="form-control" %}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Created By</label>
+                                <input type="text" value="{{request.user.email|title}}" class="form-control" id="exampleInputPassword1" readonly>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}

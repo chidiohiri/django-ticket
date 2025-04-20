@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row align-items-md-stretch">
+    <div class="col-md-6">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>Create A Ticket</h2>
+            <p>
+                Submit a ticket to the tech support team, so they can resolve your issue within minutes.
+                Please note that each ticket cost 500 NGN. We usually expect a single issue per ticket.
+            </p>
+            <a href="{% url 'create-ticket' %}" class="btn btn-outline-light" type="button">Create Ticket</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="h-100 p-5 bg-light border rounded-3">
+            <h2>Fund Your Wallet</h2>
+            <p>
+                If your wallet is low, you can fund it to create new support ticket. The payment gateway is secured
+                with paystack and your card credentials are processed through paystack. Seamless transactions.
+            </p>
+            <a href="{% url 'initialize-payment' %}" class="btn btn-outline-secondary" type="button">Fund Wallet</a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Filter Tickets</h6>
+
+            </div>
+            <div class="card-body">
+                <div class="card">
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-2">
+                                <label for="exampleInputEmail1" class="form-label">Title</label>
+                                {% render_field filter.form.title class="form-control" %}
+
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="exampleInputEmail1" class="form-label">Status</label>
+                                {% render_field filter.form.status class="form-control" %}
+
+                            </div>
+                           
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Priority</label>
+                                {% render_field filter.form.priority class="form-control" %}
+
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Engineer Tickets</h6>
+                
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Title</th>
+                            <th scope="col">Priority</th>
+                            <th scope="col">Date Created</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ticket.title}}</td>
+                            <td>{{ticket.priority}}</td>
+                            <td>{{ticket.created_on|date}}</td>
+                            <td>
+                                <a href="{% url 'ticket-details' ticket.pk %}" class="btn btn-primary btn-sm">View</a>
+                                {% if not ticket.is_resolved %}
+                                <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                    <div class="btn-group" role="group">
+                                        <button id="btnGroupDrop1" type="button"
+                                            class="btn btn-secondary dropdown-toggle btn-sm" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                            Dropdown
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                            <li><a class="dropdown-item"
+                                                    href="{% url 'assign-ticket' ticket.pk %}">Assign Ticket</a></li>
+                                            
+                                        </ul>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                          
+                            <!-- Modal -->
+                            <div class="modal fade" id="exampleModal-{{ticket.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Heads Up!</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Deleting this ticket would delete all the resources also attached to the ticket. Do you wish to proceed?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <a type="button" class="btn btn-danger" href="{% url 'delete-ticket' ticket.pk %}">Yes, Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        {% if tickets.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tickets.previous_page_number }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% if tickets.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ tickets.next_page_number }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                        </li>
+                        {% endif %}
+
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

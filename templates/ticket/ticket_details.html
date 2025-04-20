@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Ticket Information</h6>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ticket.title}}</h5>
+                <p class="card-text">"{{ticket.description}}"</p>
+                <div>
+
+                    Created On: {{ticket.created_on}} <br> Created By: {{ticket.created_by.first_name}} <br>
+                    Assigned To: {{ticket.assigned_to}} <br> Status: {{ticket.status}} | Priority: {{ticket.priority}}
+
+                </div>
+
+                {% if ticket.is_resolved %}
+                <div class="mt-3">
+                    <b>Resolution:</b> {{ticket.resolution_summary}}
+                </div>
+                {% endif %}
+
+                <div class="btn-group mt-4" role="group" aria-label="Button group with nested dropdown">
+
+                    <div class="btn-group" role="group">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                            {% if request.user.is_customer %}
+                            {% if not ticket.is_resolved %}
+                            <li><a class="dropdown-item" href="{% url 'update-ticket' ticket.pk %}">Update Ticket</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'change-priority' ticket.pk %}">Change
+                                    Priority</a></li>
+                            <li><a class="dropdown-item" href="{% url 'attach-file' ticket.pk %}">Upload Files</a></li>
+                            <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal-{{ticket.pk}}">Delete Ticket</a></li>
+                            {% else %}
+                            {% if not ticket.has_feedback %}
+                            <li><a class="dropdown-item" href="{% url 'ticket-feedback' ticket.pk %}">Give Feedback</a>
+                            </li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{% url 'reopen-ticket' ticket.pk %}">Reopen Ticket</a>
+                            </li>
+                            {% endif %}
+                            {% elif request.user.is_support_engineer %}
+                            {% if not ticket.is_resolved %}
+                            <li><a class="dropdown-item" href="{% url 'assign-ticket' ticket.pk %}">Assign Ticket</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'resolve-ticket' ticket.pk %}">Resolve Ticket</a>
+                            </li>
+                            {% endif %}
+                            {% endif %}
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Ticket Uploads</h6>
+            </div>
+            <div class="card-body">
+                {% for upload in uploads %}
+                <p class="card-text">{{ upload.file.name|cut:"ticket_attachments/" }} <span><small><a
+                                href="{{upload.file.url}}">(Download)</a></small></span></p>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if ticket.has_feedback %}
+        <div class="card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Customer Feedback</h6>
+            </div>
+            <div class="card-body">
+                
+                <p class="card-text">Rating: {{ticket.ticketfeedback.ratings}}</p>
+                <p class="card-text">Customer comment: {{ticket.ticketfeedback.comment}}</p>
+                
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center ">
+                <h6 class="mb-0">Ticket Notes</h6>
+            </div>
+            <div class="card-body">
+                {% for note in ticket_notes %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        {{note.note}}
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">{{note.created_on|date}} | {{note.created_by.first_name}}</small>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not ticket.is_resolved %}
+                <div class="mt-4">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#ticketnote" class="btn btn-primary">Add Note</a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white">
+                <nav aria-label="...">
+                    <ul class="pagination justify-content-end">
+                        {% if ticket_notes.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ ticket_notes.previous_page_number }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        {% endif %}
+
+                        {% if ticket_notes.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ ticket_notes.next_page_number }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Ticket Note Modal -->
+<div class="modal fade" id="ticketnote" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add a Ticket Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'add-ticket-note' ticket.pk %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Note</label>
+                                <input type="text" class="form-control" id="exampleInputEmail1"
+                                    aria-describedby="emailHelp" name="note">
+                                <div id="emailHelp" class="form-text">
+                                    Note will be seen by everyone with access to ticket information
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal-{{ticket.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Heads Up!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Deleting this ticket would delete all the resources also attached to the ticket. Do you wish to proceed?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a type="button" class="btn btn-danger" href="{% url 'delete-ticket' ticket.pk %}">Yes, Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row align-items-md-stretch">
+    <div class="col-md-6">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+            <h2>Engineer Dashboard</h2>
+            <p>
+                All tickets should be attended to with high priority and swiftness since this is 
+                a premiere support. Customers should be given resolution to all their issues and no ticket
+                should be left idle.
+            </p>
+            <a href="{% url 'engineer-tickets' %}" class="btn btn-outline-light" type="button">Manage Tickets</a>
+        </div>
+    </div>
+    
+   
+</div>
+
+{% endblock content %}
